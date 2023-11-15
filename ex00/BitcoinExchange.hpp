@@ -3,17 +3,24 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
 
 class BitcoinExchange
 {
 public:
-	static BitcoinExchange* getInstance();
 	//정적 멤버 함수를 통해 전역적으로 접근 가능한 인스턴스 반환
-	void	someFunction(); // 필요한 멤버 함수 만들기
+	static BitcoinExchange*	getInstance();
+	static void	releaseInstance();
+
+	// 필요한 멤버 함수 만들기
+	void	printBitcoinData();
+	void	setBitcoinData();
+	bool	isValidDate(const std::string& data);
 
 private:
 	static BitcoinExchange* instance;
+	std::map<std::string, double> bitcoinData;
 
 	BitcoinExchange();
 	~BitcoinExchange();
