@@ -16,7 +16,9 @@ public:
 	// 필요한 멤버 함수 만들기
 	void	printBitcoinData();
 	void	setBitcoinData();
+	bool	isValidField(const std::string& firstLine);
 	bool	isValidDate(const std::string& data);
+	std::string	removeWhitespace(std::string& field);
 
 private:
 	static BitcoinExchange* instance;

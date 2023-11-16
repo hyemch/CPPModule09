@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 	(void)argv;
 	BitcoinExchange* btcExchange = BitcoinExchange::getInstance();
 	btcExchange->setBitcoinData();
-	btcExchange->printBitcoinData();
+//	btcExchange->printBitcoinData();
 	BitcoinExchange::releaseInstance();
 	//open input file
 	// open error 처리

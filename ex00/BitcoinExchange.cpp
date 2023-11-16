@@ -34,6 +34,11 @@ void	BitcoinExchange::setBitcoinData()
 	}
 	std::string line;
 	std::getline(dataFile, line);
+	if (!isValidField(line))
+	{
+		std::cerr << "Error: could not find data field: " << line << std::endl;
+		return ;
+	}
 	while (std::getline(dataFile, line))
 	{
 		std::istringstream	iss(line);
@@ -51,12 +56,31 @@ void	BitcoinExchange::setBitcoinData()
 		}
 		if (!isValidDate(date))
 		{
-			std::cerr << "Error: date is invalid." << std::endl;
+			std::cerr << "Error: date form [0000-00-00] : " << date << std::endl;
 		}
 		bitcoinData[date] = exchangeRate;
 		//날짜 유효한지 확인
 		// map에 넣어줘....
 	}
+}
+
+bool	BitcoinExchange::isValidField(const std::string &firstLine)
+{
+	std::istringstream line(firstLine);
+	std::string field1;
+	std::string field2;
+	std::getline(line, field1, ',');
+	std::getline(line, field2);
+	//각 필드의 맨 앞, 맨 뒤 화이트스페이스 제거
+	field1 = removeWhitespace(field1);
+	std::cout << "field1: " << field1 << std::endl;
+	field2 = removeWhitespace(field2);
+	std::cout << "field2: " << field2 << std::endl;
+	if (field1 != "date" || field2 != "exchange_rate")
+	{
+		return false;
+	}
+	return true;
 }
 
 bool	BitcoinExchange::isValidDate(const std::string &date)
@@ -89,9 +113,23 @@ bool	BitcoinExchange::isValidDate(const std::string &date)
 	dateStream >> year >> dash1 >> month >> dash2 >> day;
 
 	// stringstream이 제대로 파싱했는지와 각 부분이 유효한 값인지 확인
-	return dateStream.eof() && dash1 == '-' && dash2 == '-' &&
-		   year >= 0 && month >= 1 && month <= 12 &&
-		   day >= 1 && day <= 31;
+	return dateStream.eof() && year >= 0 && month >= 1 && month <= 12 \
+	&& day >= 1 && day <= 31;
+}
+
+std::string BitcoinExchange::removeWhitespace(std::string &field)
+{
+	int start = 0;
+	int end = field.size();
+	while (start < end && std::isspace(field[start]))
+	{
+		start++;
+	}
+	while (end > start && std::isspace(field[end - 1]))
+	{
+		end--;
+	}
+	return field.substr(start, end - start);
 }
 
 void	BitcoinExchange::printBitcoinData()
@@ -101,7 +139,6 @@ void	BitcoinExchange::printBitcoinData()
 		std::cout << "key: " << it->first << "exchangeRate: " << it->second << std::endl;
 	}
 }
-
 
 //std::ifstream	file((argv[1]));
 //if (!file.is_open())
