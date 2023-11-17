@@ -14,11 +14,14 @@ public:
 	static void	releaseInstance();
 
 	// 필요한 멤버 함수 만들기
-	void	printBitcoinData();
 	void	setBitcoinData();
-	bool	isValidField(const std::string& firstLine);
+	bool	isValidField(const std::string& firstLine, const char sep, std::string str1, std::string str2);
 	bool	isValidDate(const std::string& data);
-	std::string	removeWhitespace(std::string& field);
+
+	void	setInputFile(const char* argv);
+
+	void	removeWhitespace(std::string& field);
+	void	printBitcoinData();
 
 private:
 	static BitcoinExchange* instance;

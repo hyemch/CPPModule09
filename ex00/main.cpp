@@ -7,13 +7,13 @@ int main(int argc, char* argv[])
 		std::cout << "Error: could not open file." << std::endl;
 		return 1;
 	}
-	(void)argv;
+
 	BitcoinExchange* btcExchange = BitcoinExchange::getInstance();
 	btcExchange->setBitcoinData();
 //	btcExchange->printBitcoinData();
+	btcExchange->setInputFile(argv[1]);
+
 	BitcoinExchange::releaseInstance();
-	//open input file
-	// open error 처리
 
 	return 0;
 }
