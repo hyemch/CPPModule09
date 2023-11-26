@@ -33,8 +33,6 @@ bool	BitcoinExchange::isValidField(const std::string &firstLine, const char sep,
 	//각 필드의 맨 앞, 맨 뒤 화이트스페이스 제거
 	removeWhitespace(field1);
 	removeWhitespace(field2);
-//	std::cout << "field1: [" << field1 << "]" << std::endl;
-//	std::cout << "field2: [" << field2 << "]" << std::endl;
 	if (field1 != str1 || field2 != str2)
 	{
 		return false;
@@ -102,18 +100,22 @@ void	BitcoinExchange::setBitcoinData()
 			std::cerr << "Error: database date error." << std::endl;
 			return ;
 		}
-		if (!(iss >> exchangeRate))
+		if (!isValidDate(date))
+		{
+			std::cerr << "Error: date form [0000-00-00] : " << date << std::endl;
+			return ;
+		}
+		if (!(iss >> exchangeRate) || !iss.eof())
 		{
 			std::cerr << "Error: database exchange rate error." << std::endl;
 			return ;
 		}
-		if (!isValidDate(date))
-		{
-			std::cerr << "Error: date form [0000-00-00] : " << date << std::endl;
-		}
+//		if (!iss.eof())
+//		{
+//			std::cerr << "Error: database exchange rate value error." << std::endl;
+//			return ;
+//		}
 		bitcoinData[date] = exchangeRate;
-		//날짜 유효한지 확인
-		// map에 넣어줘....
 	}
 }
 
@@ -137,19 +139,50 @@ void	BitcoinExchange::setInputFile(const char* argv)
 	{
 		std::istringstream iss(line);
 		std::string	date;
-		float	value;
-		if (!std::getline(iss, date, '|'))
+		double	value;
+		if (!std::getline(iss, date, '|') || !line.find('|', 11))
 		{
-			std::cerr << "Error: database date error." << std::endl;
+			std::cout << "Error: bad input => [" << line << "]"<< std::endl;
+			continue;
 		}
-		else
+		if (!(iss >> value) || !iss.eof())
 		{
-			//value 파싱
+			std::cerr << "Error: bad input => " << line << std::endl;
+			continue;
 		}
+		removeWhitespace(date);
+		if (!isValidDate(date))
+		{
+			std::cerr << "Error: date form [0000-00-00] : " << date << std::endl;
+			continue;
+		}
+		if (value <= 0 || value >= 1000)
+		{
+			std::cerr << "Error: Out of range [0 ~ 1000]" << std::endl;
+			continue;
+		}
+		std::map<std::string, double>::iterator findData = bitcoinData.lower_bound(date);
+		if (findData == bitcoinData.begin())
+		{
+			std::cerr << "Error: no valid date found." << std::endl;
+			return ;
+		}
+		if (findData->first != date)
+		{
+			--findData;
+		}
+		double result = value * findData->second;
+		std::cout << date << " => " << value << " = " << result << std::endl;
+
+//		/*value 파싱
+//		 * 1. date 0000-00-00
+//		 * 2. value 0 - 1000 사이의 unsigned int or float
+//		 * 유효할 경우 data.cvs 의 환율 곱해서 결과 표준 출력에 표시
+//		 * -> 날짜가 없을 경우 가장 가까운 하위 날
+//		 * 아닐경우 다음 줄 파싱
+//		 * */
 	}
-	// 값이 유효하지 않아도 다음 줄 계속 파싱
-	//isValiDdate
-	//isValidValue (0~ 1000 사이의 양의정수 of float)
+//isValidValue (0~ 1000 사이의 양의정수 or 부동소수점)
 }
 
 void	BitcoinExchange::removeWhitespace(std::string &field)
@@ -168,10 +201,10 @@ void	BitcoinExchange::removeWhitespace(std::string &field)
 	field.erase(end);
 }
 
-//void	BitcoinExchange::printBitcoinData()
-//{
-//	for(std::map<std::string, double>::iterator it = bitcoinData.begin(); it != bitcoinData.end(); it++)
-//	{
-//		std::cout << "key: " << it->first << "exchangeRate: " << it->second << std::endl;
-//	}
-//}
+void	BitcoinExchange::printBitcoinData()
+{
+	for(std::map<std::string, double>::iterator it = bitcoinData.begin(); it != bitcoinData.end(); it++)
+	{
+		std::cout << "key: " << it->first << " exchangeRate: " <<  std::setprecision(15) <<it->second << std::endl;
+	}
+}
