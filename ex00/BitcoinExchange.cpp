@@ -201,10 +201,10 @@ void	BitcoinExchange::removeWhitespace(std::string &field)
 	field.erase(end);
 }
 
-void	BitcoinExchange::printBitcoinData()
-{
-	for(std::map<std::string, double>::iterator it = bitcoinData.begin(); it != bitcoinData.end(); it++)
-	{
-		std::cout << "key: " << it->first << " exchangeRate: " <<  std::setprecision(15) <<it->second << std::endl;
-	}
-}
+//void	BitcoinExchange::printBitcoinData()
+//{
+//	for(std::map<std::string, double>::iterator it = bitcoinData.begin(); it != bitcoinData.end(); it++)
+//	{
+//		std::cout << "key: " << it->first << " exchangeRate: " <<  std::setprecision(15) <<it->second << std::endl;
+//	}
+//}

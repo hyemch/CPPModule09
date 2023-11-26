@@ -29,8 +29,8 @@ private:
 
 	BitcoinExchange();
 	~BitcoinExchange();
-	BitcoinExchange& operator=(const BitcoinExchange& other);
 	BitcoinExchange(const BitcoinExchange& other);
+	BitcoinExchange& operator=(const BitcoinExchange& other);
 
 };
 
