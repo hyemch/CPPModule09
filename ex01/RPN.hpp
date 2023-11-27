@@ -11,12 +11,14 @@ public:
 	static RPN*	getInstance();
 	static void	releaseInstance();
 
-//	void	calculationNum(const char* argv);
-	bool	isValidExpression(const char *argv);
+	void	calculateRPN(const char* argv);
+	bool	isValidExpression(const char* argv);
+	bool	isOperator(const std::string& token);
+	void	executeOperator(const std::string& token);
 
 public:
 	static RPN* instance;
-	std::stack<int> operandStack;
+	std::stack<long> operandStack;
 
 	RPN();
 	~RPN();

@@ -23,19 +23,110 @@ void	RPN::releaseInstance()
 	}
 }
 
-bool	RPN::isValidExpression(const char *argv)
+void	RPN::calculateRPN(const char *argv)
+{
+	if (!isValidExpression(argv))
+	{
+		std::cerr << "Error: RPN example: \"[num1] [num2] [operator] ...\"" << std::endl;
+		return ;
+	}
+	std::istringstream iss(argv);
+	std::string token;
+	while (iss >> token)
+	{
+		if (!isOperator(token))
+		{
+			int operand = atoi(token.c_str());
+			if (operand > 9 || operand < 0)
+			{
+				std::cerr << "Error : operand range [0 ~ 9]" << std::endl;
+				return ;
+			}
+			operandStack.push(operand);
+		}
+		else
+		{
+			if (operandStack.size() < 2)
+			{
+				std::cerr << "Error: Not enough operands." << std::endl;
+				return ;
+			}
+			executeOperator(token);
+		}
+	}
+	if (operandStack.size() == 1)
+	{
+		if (operandStack.top() > INT_MAX)
+		{
+			std::cerr << "Error: too large a number." << std::endl;
+			return ;
+		}
+		else if (operandStack.top() < INT_MIN)
+		{
+			std::cerr << "Error: too small a number." << std::endl;
+			return ;
+		}
+		std::cout << operandStack.top() << std::endl;
+	}
+	else
+	{
+		std::cerr << "Error: RPN is invalid." << std::endl;
+		return ;
+	}
+}
+
+bool	RPN::isValidExpression(const char* argv)
 {
 	std::string expression = argv;
 	for (size_t i = 0; i < expression.size(); i++)
 	{
-		if (!isdigit(expression[i]) && !(expression[i] == '+' || expression[i] == '-' \
-		|| expression[i] == '*' || expression[i] == '/') && expression[i] != ' ')
+		if (i % 2 == 1)
 		{
-			std::cout << "Error" << std::endl;
+			if (expression[i] != ' ')
+				return false;
+		}
+		else if (!isdigit(expression[i]) && !(expression[i] == '+' || expression[i] == '-' \
+		|| expression[i] == '*' || expression[i] == '/'))
+		{
 			return false;
 		}
-		//숫자 10 넘어가는 경우도 x
 	}
-//	std::string operatorToken;
 	return true;
+}
+
+bool	RPN::isOperator(const std::string &token)
+{
+	if (token == "+" || token == "-" || token == "/" || token == "*")
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void	RPN::executeOperator(const std::string &token)
+{
+	long operand1 = operandStack.top();
+	operandStack.pop();
+	long operand2 = operandStack.top();
+	operandStack.pop();
+
+	if (token == "+")
+	{
+		operandStack.push(operand2 + operand1);
+	}
+	else if (token == "-")
+	{
+		operandStack.push(operand2 - operand1);
+	}
+	else if (token == "/")
+	{
+		operandStack.push(operand2 / operand1);
+	}
+	else if (token == "*")
+	{
+		operandStack.push(operand2 * operand1);
+	}
 }
