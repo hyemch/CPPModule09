@@ -27,7 +27,7 @@ void	RPN::calculateRPN(const char *argv)
 {
 	if (!isValidExpression(argv))
 	{
-		std::cerr << "Error: RPN example: \"[num1] [num2] [operator] ...\"" << std::endl;
+		std::cerr << "Error: RPN example: \"[a positive integer1] [a positive integer2] [operator] ...\"" << std::endl;
 		return ;
 	}
 	std::istringstream iss(argv);
