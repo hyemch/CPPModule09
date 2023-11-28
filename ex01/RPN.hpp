@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 #include <stack>
+#include <climits>
+#include <cstdlib>
 
 class RPN
 {
