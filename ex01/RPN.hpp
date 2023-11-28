@@ -18,7 +18,7 @@ public:
 	bool	isOperator(const std::string& token);
 	void	executeOperator(const std::string& token);
 
-public:
+private:
 	static RPN* instance;
 	std::stack<long> operandStack;
 
