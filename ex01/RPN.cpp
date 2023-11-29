@@ -75,7 +75,7 @@ void	RPN::calculateRPN(const char *argv)
 	}
 }
 
-bool	RPN::isValidExpression(const char* argv)
+bool	RPN::isValidExpression(const std::string&equence)
 {
 	std::string expression = argv;
 	for (size_t i = 0; i < expression.size(); i++)

@@ -7,12 +7,8 @@ int main(int argc, char* argv[])
 		std::cout << "Usage: ./PmergeMe [num1 num2 num3 ...]"<< std::endl;
 		return 1;
 	}
-
 	PmergeMe*	pMergeMe = PmergeMe::getInstance();
-	for (int i = 0; i < argc; ++i)
-	{
-			pMergeMe->isValidSequence(argv[i]);
-	}
+	pMergeMe->parseArguments(argc, argv);
 	PmergeMe::releaseInstace();
 	return 0;
 }
