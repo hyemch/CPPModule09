@@ -9,6 +9,6 @@ int main(int argc, char* argv[])
 	}
 	PmergeMe*	pMergeMe = PmergeMe::getInstance();
 	pMergeMe->parseArguments(argc, argv);
-	PmergeMe::releaseInstace();
+	PmergeMe::releaseInstance();
 	return 0;
 }

@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <sstream>
-#include <vector>
 #include <list>
+#include <deque>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -13,20 +13,20 @@ class	PmergeMe
 {
 public:
 	static PmergeMe*	getInstance();
-	static void			releaseInstace();
+	static void			releaseInstance();
 
 	void	parseArguments(int argc, char* argv[]);
 	bool	isValidSequence(std::string& sequence);
 	bool	isValidNum(std::string &temp);
 
-	void	printVector(const std::vector<long>& vector, const std::string& message);
-
+	void	printList(const std::list<long>& list, const std::string& message);
+    void    printDeque(const std::deque<long>& deque, const std::string& message);
 	void	mergeInsertSort(void);
 
 private:
 	static PmergeMe*	instance;
-	std::vector<long> vectorSequence;
-//	std::list<int> listSequence;
+	std::list<long>listSequence;
+    std::deque<long>dequeSequence;
 
 	PmergeMe();
 	~PmergeMe();

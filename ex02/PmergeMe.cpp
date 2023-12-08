@@ -14,7 +14,7 @@ PmergeMe*	PmergeMe::getInstance()
 	return instance;
 }
 
-void	PmergeMe::releaseInstace()
+void	PmergeMe::releaseInstance()
 {
 	if(instance != NULL)
 	{
@@ -37,6 +37,7 @@ bool	PmergeMe::isValidNum(std::string &temp)
 
 bool	PmergeMe::isValidSequence(std::string& sequence)
 {
+    //'jot -r 3000 1 100000 | tr '\n' ' ''
 	std::cout <<"sequence: " << sequence << std::endl;
 	std::istringstream	iss(sequence);
 	std::string	temp;
@@ -54,19 +55,31 @@ bool	PmergeMe::isValidSequence(std::string& sequence)
 			std::cerr << "Error: Failed to convert to a number: [" << num << "]" << std::endl;
 			return false;
 		}
-		vectorSequence.push_back(num);
+		listSequence.push_back(num);
+        dequeSequence.push_back(num);
 	}
+    std::cout <<"Before: " << sequence << std::endl;
 	return true;
 }
 
-void	PmergeMe::printVector(const std::vector<long> &vector, const std::string &message)
+void	PmergeMe::printList(const std::list<long> &list, const std::string &message)
 {
 	std::cout << message;
-	for (std::vector<long>::const_iterator it = vector.begin(); it != vector.end(); it++)
+	for (std::list<long>::const_iterator it = list.begin(); it != list.end(); it++)
 	{
 		std::cout << *it  << " ";
 	}
 	std::cout << std::endl;
+}
+
+void	PmergeMe::printDeque(const std::deque<long> &deque, const std::string &message)
+{
+    std::cout << message;
+    for (std::deque<long>::const_iterator it = deque.begin(); it != deque.end(); it++)
+    {
+        std::cout << *it  << " ";
+    }
+    std::cout << std::endl;
 }
 
 void	PmergeMe::parseArguments(int argc, char **argv)
@@ -83,7 +96,9 @@ void	PmergeMe::parseArguments(int argc, char **argv)
 	{
 		return ;
 	}
-	printVector(vectorSequence, "Before: ");
+	printList(listSequence, "list: Before: ");
+    printDeque(dequeSequence, "deque: Before: ");
+
 }
 
 void	PmergeMe::mergeInsertSort()
@@ -98,7 +113,7 @@ void	PmergeMe::mergeInsertSort()
 //	//merge-insert Sort
 //	clock_t endTime = clock();
 //	double printTime = startTime - endTime;
-//	std::cout << "Time to process a rang of " << vectorSequence.size() \
+//	std::cout << "Time to process a rang of " << listSequence.size() \
 //	<< "elements with " << containerName<< printTime << "seconds" << std::endl;
 //}
 
