@@ -37,7 +37,6 @@ bool	PmergeMe::isValidNum(std::string &temp)
 
 bool	PmergeMe::isValidSequence(std::string& sequence)
 {
-    //'jot -r 3000 1 100000 | tr '\n' ' ''
 	std::cout <<"sequence: " << sequence << std::endl;
 	std::istringstream	iss(sequence);
 	std::string	temp;
@@ -101,19 +100,29 @@ void	PmergeMe::parseArguments(int argc, char **argv)
 
 }
 
-void	PmergeMe::mergeInsertSort()
+void	PmergeMe::mergeInsertSort(std::deque<long>& dequeSequence)
 {
 
 }
+//
+void	PmergeMe::timeUsed(const std::string containerName)
+{
+	//std::list
+	clock_t startTime = clock();
+	//merge-insert Sort
+	clock_t endTime = clock();
+	double printTime = static_cast<double>(startTime - endTime);
+	//정렬 된 배열 출력 "After : "
+	std::cout << "Time to process a rang of " << listSequence.size() \
+	<< "elements with " << " std::list " << printTime << "seconds" << std::endl;
 
+	//std::deque
+	clock_t startTime = clock();
+	//merge-insert Sort
+	clock_t endTime = clock();
+	double printTime = static_cast<double>(startTime - endTime);
+	//정렬 된 배열 출력 "After : "
+	std::cout << "Time to process a rang of " << dequeSequence.size() \
+	<< "elements with " << " std::deque " << printTime << "seconds" << std::endl;
 
-//void	PmergeMe::timeUsed(const std::string containerName)
-//{
-//	clock_t startTime = clock();
-//	//merge-insert Sort
-//	clock_t endTime = clock();
-//	double printTime = startTime - endTime;
-//	std::cout << "Time to process a rang of " << listSequence.size() \
-//	<< "elements with " << containerName<< printTime << "seconds" << std::endl;
-//}
-
+}
