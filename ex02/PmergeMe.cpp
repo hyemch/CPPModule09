@@ -113,22 +113,21 @@ void	PmergeMe::mergeInsertSortDeque(std::deque<int>& dequeSequence)
 
 	std::deque<std::pair<int,int> > pairDeque;
 	int straggler = 0;
-//	std::deque<int> mainChain;
-//	std::deque<int> pendingChain;
-
-	for(size_t i = 0; i < dequeSequence.size(); i += 2)
+	std::deque<int> mainChain;
+	std::deque<int> pendingChain;
+	if (dequeSequence.size() % 2)
 	{
-//		if (dequeSequence.size() % 2 && i == dequeSequence.size() - 1)
-//		{
-//			straggler.push_back(*dequeSequence.rbegin());
-//		}
-		else if (dequeSequence[i] > dequeSequence[i + 1])
+		straggler = *dequeSequence.rbegin();
+	}
+	for(size_t i = 1; i < dequeSequence.size(); i += 2)
+	{
+		if (dequeSequence[i - 1] > dequeSequence[i])
 		{
-			pairDeque.push_back(std::make_pair(dequeSequence[i],dequeSequence[i + 1]));
+			pairDeque.push_back(std::make_pair(dequeSequence[i - 1],dequeSequence[i]));
 		}
 		else
 		{
-			pairDeque.push_back(std::make_pair(dequeSequence[i + 1], dequeSequence[i]));
+			pairDeque.push_back(std::make_pair(dequeSequence[i], dequeSequence[i - 1]));
 		}
 	}
 	//print
@@ -136,8 +135,23 @@ void	PmergeMe::mergeInsertSortDeque(std::deque<int>& dequeSequence)
 	{
 		std::cout << "pair: " << pairDeque[i].first << ", " << pairDeque[i].second << std::endl;
 	}
-	if (dequeSequence.size() % 2)
-		std::cout << "straggler: " << *straggler.begin() << std::endl;
+	std::cout << "straggler: " << straggler << std::endl;
+	//main-chain pending-chain setting
+	std::sort(pairDeque.begin(), pairDeque.end());
+	for(std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
+	{
+		mainChain.push_back(it->first);
+		pendingChain.push_back(it->second);
+	}
+	for (size_t i = 0; i < mainChain.size(); i++)
+	{
+		std::cout << "mainChain: " << i  << ": " << mainChain[i] << std::endl;
+	}
+	for (size_t i = 0; i < pendingChain.size(); i++)
+	{
+		std::cout << "pendingChain: " << i  << ": " << pendingChain[i] << std::endl;
+	}
+
 }
 
 //void	PmergeMe::timeUsed(const std::string containerName)
