@@ -151,7 +151,21 @@ void	PmergeMe::mergeInsertSortDeque(std::deque<int>& dequeSequence)
 	{
 		std::cout << "pendingChain: " << i  << ": " << pendingChain[i] << std::endl;
 	}
+	// 야콥스탈 수에 따라 pending-chain의 요소를 main-chain에 insert, 이 때 binary search를 이용.
+	std::deque<unsigned long>	jacobsthalSequence;
+	jacobsthalSequence.push_back(0);
+	jacobsthalSequence.push_back(1);
 
+	for (size_t i = 2; i < pendingChain.size(); ++i)
+	{
+		jacobsthalSequence.push_back(jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2]);
+		std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
+		if (jacobsthalSequence[i] >= pendingChain.size())
+		{
+			break;
+		}
+	}
+	//바이너리 서치로 인서트
 }
 
 //void	PmergeMe::timeUsed(const std::string containerName)
