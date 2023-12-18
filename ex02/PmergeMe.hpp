@@ -21,17 +21,29 @@ public:
 
 	void	printList(const std::list<int>& list, const std::string& message);
     void    printDeque(const std::deque<int>& deque, const std::string& message);
-	void	mergeInsertSortDeque(std::deque<int>& dequeSequence);
+	void	mergeInsertSortDeque();
+    void    initChain();
+	void	mergeInsert(void);
+	void	calculateJacubstalSequence(unsigned int size);
 
 private:
 	static PmergeMe*	instance;
-	std::list<int>listSequence;
-    std::deque<int>dequeSequence;
+
+	std::list<int> listSequence;
+
+    std::deque<int> dequeSequence;
+    std::deque<std::pair<int,int> > pairDeque;
+	std::deque<int> mainChain;
+	std::deque<int> pendingChain;
+    int straggler;
+
+	std::deque<unsigned int>	jacobsthalSequence;
 
 	PmergeMe();
 	~PmergeMe();
 	PmergeMe(const PmergeMe& other);
 	PmergeMe& operator=(const PmergeMe& other);
+
 };
 
 #endif

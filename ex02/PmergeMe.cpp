@@ -1,6 +1,6 @@
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe() {}
+PmergeMe::PmergeMe() :straggler(0){}
 PmergeMe::~PmergeMe() {}
 
 PmergeMe*	PmergeMe::instance = NULL;
@@ -98,11 +98,11 @@ void	PmergeMe::parseArguments(int argc, char **argv)
 	}
 	printList(listSequence, "list: Before: ");
     printDeque(dequeSequence, "deque: Before: ");
-	mergeInsertSortDeque(dequeSequence);
+	mergeInsertSortDeque();
 
 }
 
-void	PmergeMe::mergeInsertSortDeque(std::deque<int>& dequeSequence)
+void	PmergeMe::mergeInsertSortDeque()
 {
 	//1. 두개 씩 묶는다. -> std::pair로 두 개씩 묶어서 새로운 각각의 컨테이너(덱, 리스트)에 넣는다.
 	//2. 우리는 오름차순으로 정렬할 것이다. 따라서 pair의 first -> 큰 값 Second ->작은 값
@@ -111,62 +111,82 @@ void	PmergeMe::mergeInsertSortDeque(std::deque<int>& dequeSequence)
 	//4. while을 돌며 야콥스탈수에 맞춰서 binary search 후 insert
 	//5. 홀수일 경우 마지막 요소는 전체를 대상으로 binary search 후 삽입
 
-	std::deque<std::pair<int,int> > pairDeque;
-	int straggler = 0;
-	std::deque<int> mainChain;
-	std::deque<int> pendingChain;
-	if (dequeSequence.size() % 2)
-	{
-		straggler = *dequeSequence.rbegin();
-	}
-	for(size_t i = 1; i < dequeSequence.size(); i += 2)
-	{
-		if (dequeSequence[i - 1] > dequeSequence[i])
-		{
-			pairDeque.push_back(std::make_pair(dequeSequence[i - 1],dequeSequence[i]));
-		}
-		else
-		{
-			pairDeque.push_back(std::make_pair(dequeSequence[i], dequeSequence[i - 1]));
-		}
-	}
-	//print
-	for (size_t i = 0; i < pairDeque.size(); i++)
-	{
-		std::cout << "pair: " << pairDeque[i].first << ", " << pairDeque[i].second << std::endl;
-	}
-	std::cout << "straggler: " << straggler << std::endl;
-	//main-chain pending-chain setting
-	std::sort(pairDeque.begin(), pairDeque.end());
-	for(std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
-	{
-		mainChain.push_back(it->first);
-		pendingChain.push_back(it->second);
-	}
-	for (size_t i = 0; i < mainChain.size(); i++)
-	{
-		std::cout << "mainChain: " << i  << ": " << mainChain[i] << std::endl;
-	}
-	for (size_t i = 0; i < pendingChain.size(); i++)
-	{
-		std::cout << "pendingChain: " << i  << ": " << pendingChain[i] << std::endl;
-	}
-	// 야콥스탈 수에 따라 pending-chain의 요소를 main-chain에 insert, 이 때 binary search를 이용.
-	std::deque<unsigned long>	jacobsthalSequence;
+    initChain();
+    //main-chain pending-chain print
+    printDeque(mainChain, "Before MainChain: ");
+    printDeque(pendingChain, "Before PendingChain: ");
+	//야콥스탈 수에 따라 pending-chain의 요소를 main-chain에 insert, 이 때 binary search를 이용.
+	calculateJacubstalSequence(pendingChain.size());
+	mergeInsert();
+	//바이너리 서치로 인서트
+}
+
+void PmergeMe::initChain()
+{
+    if (dequeSequence.size() % 2)
+    {
+        straggler = *dequeSequence.rbegin();
+    }
+    for(size_t i = 1; i < dequeSequence.size(); i += 2)
+    {
+        if (dequeSequence[i - 1] > dequeSequence[i])
+        {
+            pairDeque.push_back(std::make_pair(dequeSequence[i - 1],dequeSequence[i]));
+        }
+        else
+        {
+            pairDeque.push_back(std::make_pair(dequeSequence[i], dequeSequence[i - 1]));
+        }
+    }
+    //print
+    for (size_t i = 0; i < pairDeque.size(); i++)
+    {
+        std::cout << "pair: " << pairDeque[i].first << ", " << pairDeque[i].second << std::endl;
+    }
+    std::cout << "straggler: " << straggler << std::endl;
+    //main-chain pending-chain setting
+    std::sort(pairDeque.begin(), pairDeque.end());
+    for(std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
+    {
+        mainChain.push_back(it->first);
+        pendingChain.push_back(it->second);
+    }
+}
+
+void	PmergeMe::mergeInsert(void)
+{
+    // pending-chain 원소들을 하나씩 돌면서 main-chain에 삽입
+    // 이때 binary search하여 더 작은 원소 다음자리에 삽입
+    // 야콥스탈수열에 따른 순서대로 진행 1 -> 3 2 -> 5 4 -> 11 10 9 8 7 6 -> 21 20 ..
+    mainChain.push_front(pendingChain[0]);
+    //binary search
+    size_t pIdx = 1;
+    size_t jIdx = 3;
+    for (; jIdx < jacobsthalSequence.size(); ++jIdx)
+    {
+        for (; pIdx < pendingChain.size(); ++pIdx)
+        {
+//            std::deque<std::pair<int,int> >::iterator it =
+        }
+    }
+}
+
+void	PmergeMe::calculateJacubstalSequence(unsigned int size)
+{
 	jacobsthalSequence.push_back(0);
 	jacobsthalSequence.push_back(1);
 
-	for (size_t i = 2; i < pendingChain.size(); ++i)
+	for (size_t i = 2; i < size; ++i)
 	{
 		jacobsthalSequence.push_back(jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2]);
 		std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
-		if (jacobsthalSequence[i] >= pendingChain.size())
+		if (jacobsthalSequence[i] >= size)
 		{
 			break;
 		}
 	}
-	//바이너리 서치로 인서트
 }
+
 
 //void	PmergeMe::timeUsed(const std::string containerName)
 //{
