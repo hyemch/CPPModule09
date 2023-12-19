@@ -102,26 +102,7 @@ void	PmergeMe::parseArguments(int argc, char **argv)
 
 }
 
-void	PmergeMe::mergeInsertSortDeque()
-{
-	//1. 두개 씩 묶는다. -> std::pair로 두 개씩 묶어서 새로운 각각의 컨테이너(덱, 리스트)에 넣는다.
-	//2. 우리는 오름차순으로 정렬할 것이다. 따라서 pair의 first -> 큰 값 Second ->작은 값
-	// 		first -> 메인체인 / second -> pending 체인
-	//3. 메인체인 정렬
-	//4. while을 돌며 야콥스탈수에 맞춰서 binary search 후 insert
-	//5. 홀수일 경우 마지막 요소는 전체를 대상으로 binary search 후 삽입
-
-    initChain();
-    //main-chain pending-chain print
-    printDeque(mainChain, "Before MainChain: ");
-    printDeque(pendingChain, "Before PendingChain: ");
-	//야콥스탈 수에 따라 pending-chain의 요소를 main-chain에 insert, 이 때 binary search를 이용.
-	calculateJacubstalSequence(pendingChain.size());
-	mergeInsert();
-	//바이너리 서치로 인서트
-}
-
-void PmergeMe::initChain()
+void PmergeMe::initChainDeque()
 {
     if (dequeSequence.size() % 2)
     {
@@ -153,37 +134,98 @@ void PmergeMe::initChain()
     }
 }
 
-void	PmergeMe::mergeInsert(void)
+void	PmergeMe::mergeInsertSortDeque()
+{
+	//1. 두개 씩 묶는다. -> std::pair로 두 개씩 묶어서 새로운 각각의 컨테이너(덱, 리스트)에 넣는다.
+	//2. 우리는 오름차순으로 정렬할 것이다. 따라서 pair의 first -> 큰 값 Second ->작은 값
+	// 		first -> 메인체인 / second -> pending 체인
+	//3. 메인체인 정렬
+	//4. while을 돌며 야콥스탈수에 맞춰서 binary search 후 insert
+	//5. 홀수일 경우 마지막 요소는 전체를 대상으로 binary search 후 삽입
+
+	initChainDeque();
+	//main-chain pending-chain print
+	printDeque(mainChain, "Before MainChain: ");
+	printDeque(pendingChain, "Before PendingChain: ");
+	//야콥스탈 수에 따라 pending-chain의 요소를 main-chain에 insert, 이 때 binary search를 이용.
+	calculateJacubstalDeque(pendingChain.size());
+	mergeInsertDeque();
+	//바이너리 서치로 인서트
+}
+
+void	PmergeMe::binarySearchDeque(int pendingChainElement)
+{
+	size_t	left = 0;
+	size_t	right = mainChain.size() - pairDeque.size();
+
+	for (std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
+	{
+		if (it->second == pendingChainElement)
+			right += std::distance(pairDeque.begin(), it);
+	}
+	while(left < right)
+	{
+		size_t	mid = (left + right) / 2;
+		if (mainChain[mid] < pendingChainElement)
+		{
+			left = mid + 1;
+		}
+		else
+			right = mid;
+	}
+	mainChain.insert(mainChain.begin() + left, pendingChainElement);
+}
+
+void	PmergeMe::mergeInsertDeque(void)
 {
     // pending-chain 원소들을 하나씩 돌면서 main-chain에 삽입
     // 이때 binary search하여 더 작은 원소 다음자리에 삽입
-    // 야콥스탈수열에 따른 순서대로 진행 1 -> 3 2 -> 5 4 -> 11 10 9 8 7 6 -> 21 20 ..
+	// 야콥스탈수열에 따른 순서대로 진행 1 -> 3 2 -> 5 4 -> 11 10 9 8 7 6 -> 21 20 ..
+	//야콥스탈수와 현재 인덱스가 일치할때, 이 전 여콥스탈수보다 클때까지 하나씩 바이너리 서치
     mainChain.push_front(pendingChain[0]);
-    //binary search
-    size_t pIdx = 1;
-    size_t jIdx = 3;
-    for (; jIdx < jacobsthalSequence.size(); ++jIdx)
-    {
-        for (; pIdx < pendingChain.size(); ++pIdx)
-        {
-//            std::deque<std::pair<int,int> >::iterator it =
-        }
-    }
+	size_t	pIdx = 1;
+	std::cout << "jacobstalSequence size: " << jacobsthalSequence.size() << std::endl;
+	size_t	jEnd = jacobsthalSequence.size();
+	for (; pIdx < jacobsthalSequence[jEnd - 1]; ++pIdx)
+	{
+		for (size_t jIdx = 3; jIdx < jacobsthalSequence.size(); jIdx++)
+		{
+			if (pIdx == (jacobsthalSequence[jIdx] - 1))
+			{
+				for (size_t i = jacobsthalSequence[jIdx] - 1; i >= jacobsthalSequence[jIdx - 1]; --i)
+					binarySearchDeque(pendingChain[i]);
+			}
+		}
+	}
+	if (pIdx >= jacobsthalSequence[jEnd - 1])
+	{
+		for(size_t i = pendingChain.size() - 1; i >= jacobsthalSequence[jEnd - 1]; --i)
+		{
+			binarySearchDeque(pendingChain[i]);
+		}
+	}
+	if (straggler != 0)
+	{
+		binarySearchDeque(straggler);
+	}
+	printDeque(mainChain, "After mainchain: ");
 }
 
-void	PmergeMe::calculateJacubstalSequence(unsigned int size)
+void	PmergeMe::calculateJacubstalDeque(unsigned int size)
 {
 	jacobsthalSequence.push_back(0);
 	jacobsthalSequence.push_back(1);
 
 	for (size_t i = 2; i < size; ++i)
 	{
-		jacobsthalSequence.push_back(jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2]);
-		std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
-		if (jacobsthalSequence[i] >= size)
+		unsigned int jacobstalNum = jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2];
+		if (jacobstalNum > size)
 		{
 			break;
 		}
+		jacobsthalSequence.push_back(jacobstalNum);
+//		jacobsthalSequence.push_back(jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2]);
+		std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
 	}
 }
 

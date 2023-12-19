@@ -22,9 +22,10 @@ public:
 	void	printList(const std::list<int>& list, const std::string& message);
     void    printDeque(const std::deque<int>& deque, const std::string& message);
 	void	mergeInsertSortDeque();
-    void    initChain();
-	void	mergeInsert(void);
-	void	calculateJacubstalSequence(unsigned int size);
+    void    initChainDeque();
+	void	mergeInsertDeque(void);
+	void	binarySearchDeque(int pendingChainElement);
+	void	calculateJacubstalDeque(unsigned int size);
 
 private:
 	static PmergeMe*	instance;
