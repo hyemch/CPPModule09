@@ -96,8 +96,8 @@ void	PmergeMe::parseArguments(int argc, char **argv)
 	{
 		return ;
 	}
-	printList(listSequence, "list: Before: ");
-    printDeque(dequeSequence, "deque: Before: ");
+//	printList(listSequence, "list: Before: ");
+//  printDeque(dequeSequence, "deque: Before: ");
 	mergeInsertSortDeque();
 
 }
@@ -120,11 +120,11 @@ void PmergeMe::initChainDeque()
         }
     }
     //print
-    for (size_t i = 0; i < pairDeque.size(); i++)
-    {
-        std::cout << "pair: " << pairDeque[i].first << ", " << pairDeque[i].second << std::endl;
-    }
-    std::cout << "straggler: " << straggler << std::endl;
+//    for (size_t i = 0; i < pairDeque.size(); i++)
+//    {
+//        std::cout << "pair: " << pairDeque[i].first << ", " << pairDeque[i].second << std::endl;
+//    }
+//    std::cout << "straggler: " << straggler << std::endl;
     //main-chain pending-chain setting
     std::sort(pairDeque.begin(), pairDeque.end());
     for(std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
@@ -145,33 +145,75 @@ void	PmergeMe::mergeInsertSortDeque()
 
 	initChainDeque();
 	//main-chain pending-chain print
-	printDeque(mainChain, "Before MainChain: ");
-	printDeque(pendingChain, "Before PendingChain: ");
+//	printDeque(mainChain, "Before MainChain: ");
+//	printDeque(pendingChain, "Before PendingChain: ");
 	//야콥스탈 수에 따라 pending-chain의 요소를 main-chain에 insert, 이 때 binary search를 이용.
 	calculateJacubstalDeque(pendingChain.size());
+	clock_t startTime = clock();
 	mergeInsertDeque();
-	//바이너리 서치로 인서트
+	clock_t endTime = clock();
+	long printTime = static_cast<long>(endTime - startTime);
+	printDeque(mainChain, "After : ");
+	std::cout << "Time to process a rang of " << dequeSequence.size() \
+	<< " elements with [std::deque] " << printTime << "seconds" << std::endl;
+}
+
+void	PmergeMe::binarySearchStraggler()
+{
+	int	left = 0;
+	int	right = mainChain.size() - 1;
+
+	while(left <= right)
+	{
+		int	mid = (left + right) / 2;
+//		std::cout << "[" << left << "]: " << mainChain[left] <<"[" << right << "]: " << mainChain[right] << std::endl;
+		if (mainChain[mid] == straggler)
+		{
+			mainChain.insert(mainChain.begin() + mid, straggler);
+			return ;
+		}
+		else if (mainChain[mid] < straggler)
+		{
+			left = mid + 1;
+		}
+		else {
+			right = mid - 1;
+		}
+	}
+	mainChain.insert(mainChain.begin() + left, straggler);
 }
 
 void	PmergeMe::binarySearchDeque(int pendingChainElement)
 {
-	size_t	left = 0;
-	size_t	right = mainChain.size() - pairDeque.size();
+	int	left = 0;
+	int	right = 0;
 
 	for (std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
 	{
 		if (it->second == pendingChainElement)
-			right += std::distance(pairDeque.begin(), it);
+		{
+//			std::deque<int>::iterator mIt = std::find(mainChain.begin(), mainChain.end(), it->first);
+//			right = std::distance(mainChain.begin(), mIt);
+			right = std::distance(mainChain.begin(), std::find(mainChain.begin(), mainChain.end(), it->first));
+			break ;
+		}
 	}
-	while(left < right)
+	while(left <= right)
 	{
-		size_t	mid = (left + right) / 2;
-		if (mainChain[mid] < pendingChainElement)
+		int	mid = (left + right) / 2;
+//		std::cout << "[" << left << "]: " << mainChain[left] <<"[" << right << "]: " << mainChain[right] << std::endl;
+		if (mainChain[mid] == pendingChainElement)
+		{
+			mainChain.insert(mainChain.begin() + mid, pendingChainElement);
+			return ;
+		}
+		else if (mainChain[mid] < pendingChainElement)
 		{
 			left = mid + 1;
 		}
-		else
-			right = mid;
+		else {
+			right = mid - 1;
+		}
 	}
 	mainChain.insert(mainChain.begin() + left, pendingChainElement);
 }
@@ -183,33 +225,35 @@ void	PmergeMe::mergeInsertDeque(void)
 	// 야콥스탈수열에 따른 순서대로 진행 1 -> 3 2 -> 5 4 -> 11 10 9 8 7 6 -> 21 20 ..
 	//야콥스탈수와 현재 인덱스가 일치할때, 이 전 여콥스탈수보다 클때까지 하나씩 바이너리 서치
     mainChain.push_front(pendingChain[0]);
-	size_t	pIdx = 1;
+
 	std::cout << "jacobstalSequence size: " << jacobsthalSequence.size() << std::endl;
-	size_t	jEnd = jacobsthalSequence.size();
-	for (; pIdx < jacobsthalSequence[jEnd - 1]; ++pIdx)
+
+	for (size_t jIdx = 3; jIdx < jacobsthalSequence.size(); ++jIdx)
 	{
-		for (size_t jIdx = 3; jIdx < jacobsthalSequence.size(); jIdx++)
-		{
-			if (pIdx == (jacobsthalSequence[jIdx] - 1))
-			{
-				for (size_t i = jacobsthalSequence[jIdx] - 1; i >= jacobsthalSequence[jIdx - 1]; --i)
-					binarySearchDeque(pendingChain[i]);
-			}
-		}
-	}
-	if (pIdx >= jacobsthalSequence[jEnd - 1])
-	{
-		for(size_t i = pendingChain.size() - 1; i >= jacobsthalSequence[jEnd - 1]; --i)
+		for (size_t i = jacobsthalSequence[jIdx] - 1; i >= jacobsthalSequence[jIdx - 1]; --i)
 		{
 			binarySearchDeque(pendingChain[i]);
 		}
 	}
-	if (straggler != 0)
+	if (straggler > 0)
 	{
-		binarySearchDeque(straggler);
+		binarySearchStraggler();
 	}
-	printDeque(mainChain, "After mainchain: ");
 }
+
+//	for (size_t	pIdx = 1; pIdx < pendingChain.size(); ++pIdx)
+//	{
+//		for (size_t jIdx = 3; jIdx < jacobsthalSequence.size(); ++jIdx)
+//		{
+//			if (pIdx == (jacobsthalSequence[jIdx] - 1))
+//			{
+//				for (size_t i = jacobsthalSequence[jIdx] - 1; i >= jacobsthalSequence[jIdx - 1]; --i)
+//				{
+//					binarySearchDeque(pendingChain[i]);
+//				}
+//			}
+//		}
+//	}
 
 void	PmergeMe::calculateJacubstalDeque(unsigned int size)
 {
@@ -221,14 +265,14 @@ void	PmergeMe::calculateJacubstalDeque(unsigned int size)
 		unsigned int jacobstalNum = jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2];
 		if (jacobstalNum > size)
 		{
+			jacobsthalSequence.push_back(size);
+//			std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
 			break;
 		}
 		jacobsthalSequence.push_back(jacobstalNum);
-//		jacobsthalSequence.push_back(jacobsthalSequence[i - 1] + 2 * jacobsthalSequence[i - 2]);
-		std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
+//		std::cout << "jacobstal num: " << i << ": "<< jacobsthalSequence[i] << std::endl;
 	}
 }
-
 
 //void	PmergeMe::timeUsed(const std::string containerName)
 //{
