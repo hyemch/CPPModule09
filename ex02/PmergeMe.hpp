@@ -3,11 +3,12 @@
 
 #include <iostream>
 #include <sstream>
-#include <list>
 #include <deque>
+#include <list>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <climits>
 
 class	PmergeMe
 {
@@ -19,28 +20,40 @@ public:
 	bool	isValidSequence(std::string& sequence);
 	bool	isValidNum(std::string &temp);
 
-	void	printList(const std::list<int>& list, const std::string& message);
+	void	printSortInfo();
 
 	void    printDeque(const std::deque<int>& deque, const std::string& message);
-	void	printSortInfo();
 	void	mergeInsertSortDeque(void);
     void    initChainDeque();
 	void	calculateJacubstalDeque(unsigned int size);
 	void	binarySearchDeque(int pendingChainElement);
-	void	binarySearchStraggler();
+	void	binarySearchStragglerDeque();
+
+	void	printList(const std::list<int>& list, const std::string& message);
+	void	mergeInsertSortList(void);
+	void    initChainList();
+	void	calculateJacubstalList(unsigned int size);
+	void	binarySearchList(int pendingChainElement);
+	void	binarySearchStragglerList();
 
 private:
-	static PmergeMe*	instance;
+	static PmergeMe*				instance;
 
-	std::list<int> listSequence;
+	int								stragglerDeque;
+    std::deque<int> 				dequeSequence;
+	std::deque<int>					mainChainDeque;
+	std::deque<int> 				pendingChainDeque;
+	std::deque<unsigned int>		jacobsthalSequenceDeque;
+	std::deque<std::pair<int,int> > pairDeque;
 
-    std::deque<int> dequeSequence;
-    std::deque<std::pair<int,int> > pairDeque;
-	std::deque<int> mainChain;
-	std::deque<int> pendingChain;
-    int straggler;
+	int								stragglerList;
+	std::list<int>					listSequence;
+	std::list<int>					mainChainList;
+	std::list<int>					pendingChainList;
+	std::list<unsigned int> 		jacobstalSequenceList;
+	std::list<std::pair<int,int> > pairList;
 
-	std::deque<unsigned int>	jacobsthalSequence;
+
 
 	PmergeMe();
 	~PmergeMe();
