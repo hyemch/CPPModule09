@@ -15,16 +15,17 @@ public:
 	static PmergeMe*	getInstance();
 	static void			releaseInstance();
 
-	void	parseArguments(int argc, char* argv[]);
+	bool	parseArguments(int argc, char* argv[]);
 	bool	isValidSequence(std::string& sequence);
 	bool	isValidNum(std::string &temp);
 
 	void	printList(const std::list<int>& list, const std::string& message);
-    void    printDeque(const std::deque<int>& deque, const std::string& message);
-	void	mergeInsertSortDeque();
+
+	void    printDeque(const std::deque<int>& deque, const std::string& message);
+	void	printSortInfo();
+	void	mergeInsertSortDeque(void);
     void    initChainDeque();
 	void	calculateJacubstalDeque(unsigned int size);
-	void	mergeInsertDeque(void);
 	void	binarySearchDeque(int pendingChainElement);
 	void	binarySearchStraggler();
 
