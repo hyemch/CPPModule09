@@ -112,11 +112,18 @@ void	PmergeMe::printSortInfo()
 	clock_t endTimeDeque = clock();
 	double printTimeDeque = static_cast<double>(endTimeDeque - startTimeDeque) / CLOCKS_PER_SEC * 1000;
 
-	printDeque(mainChainDeque, "After : ");
+//	printDeque(mainChainDeque, "After : ");
+
+	clock_t startTimeList = clock();
+	mergeInsertSortList();
+	clock_t endTimeList = clock();
+	double printTimeList = static_cast<double>(endTimeList - startTimeList) / CLOCKS_PER_SEC * 1000;
 	printList(mainChainList, "After : ");
 
 	std::cout << "Time to process a rang of " << dequeSequence.size() \
 	<< " elements with [std::deque] " << printTimeDeque << " milliseconds" << std::endl;
+	std::cout << "Time to process a rang of " << listSequence.size() \
+	<< " elements with [std::list ] " << printTimeList << " milliseconds" << std::endl;
 }
 
 /* pending-chain 원소들을 하나씩 돌면서 main-chain에 삽입
@@ -132,7 +139,7 @@ void	PmergeMe::mergeInsertSortDeque(void)
 		return ;
 	}
 	initChainDeque();
-	calculateJacubstalDeque(pendingChainDeque.size());
+	calculateJacobsthalDeque(pendingChainDeque.size());
 	mainChainDeque.push_front(pendingChainDeque[0]);
 	for (size_t jIdx = 3; jIdx < jacobsthalSequenceDeque.size(); ++jIdx)
 	{
@@ -167,19 +174,21 @@ void	PmergeMe::mergeInsertSortList(void)
 		return ;
 	}
 	initChainList();
-//	calculateJacubstalList(pendingChainList.size());
-//	mainChainList.push_front(pendingChainList.begin());
-//	for (size_t jIdx = 3; jIdx < jacobsthalSequenceList.size(); ++jIdx)
-//	{
+	calculateJacobsthalList(static_cast<int>(pendingChainList.size()));
+	mainChainList.push_front(*pendingChainList.begin());
+	for (size_t jIdx = 3; jIdx < jacobsthalSequenceList.size(); ++jIdx)
+	{
 //		for (size_t i = jacobsthalSequenceList[jIdx] - 1; i >= jacobsthalSequenceList[jIdx - 1]; --i)
-//		{
+		for (int i = *doAdvanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), jIdx) - 1; i >= *doAdvanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), jIdx - 1); --i)
+		{
+			binarySearchList(*doAdvanceList(pendingChainList.begin(), pendingChainList.end(), i));
 //			binarySearchList(pendingChainList[i]);
-//		}
-//	}
-//	if (stragglerDeque > 0)
-//	{
-//		binarySearchStragglerDeque();
-//	}
+		}
+	}
+	if (stragglerDeque > 0)
+	{
+		binarySearchStragglerList();
+	}
 }
 
 void PmergeMe::initChainDeque()
@@ -215,7 +224,7 @@ void PmergeMe::initChainList()
 	}
 	for(size_t i = 1; i < listSequence.size(); i += 2)
 	{
-		if (doAdvanceList(listSequence.begin(), listSequence.end(), i - 1) > doAdvanceList(listSequence.begin(), listSequence.end(), i))
+		if (*doAdvanceList(listSequence.begin(), listSequence.end(), i - 1) > *doAdvanceList(listSequence.begin(), listSequence.end(), i))
 		{
 			pairList.push_back(std::make_pair(*doAdvanceList(listSequence.begin(), listSequence.end(), i - 1), *doAdvanceList(listSequence.begin(), listSequence.end(), i)));
 		}
@@ -230,24 +239,42 @@ void PmergeMe::initChainList()
 		mainChainList.push_back(it->first);
 		pendingChainList.push_back(it->second);
 	}
-	printList(mainChainList, "list mainchain: ");
-	printList(pendingChainList, "list pendingchain: ");
+//	printList(mainChainList, "list mainchain: ");
+//	printList(pendingChainList, "list pendingchain: ");
 }
 
-void	PmergeMe::calculateJacubstalDeque(unsigned int size)
+void	PmergeMe::calculateJacobsthalDeque(unsigned int size)
 {
 	jacobsthalSequenceDeque.push_back(0);
 	jacobsthalSequenceDeque.push_back(1);
 
 	for (size_t i = 2; i < size + 2; ++i)
 	{
-		unsigned int jacobstalNum = jacobsthalSequenceDeque[i - 1] + 2 * jacobsthalSequenceDeque[i - 2];
-		if (jacobstalNum > size)
+		unsigned int jacobsthalNum = jacobsthalSequenceDeque[i - 1] + 2 * jacobsthalSequenceDeque[i - 2];
+		if (jacobsthalNum > size)
 		{
 			jacobsthalSequenceDeque.push_back(size);
 			break;
 		}
-		jacobsthalSequenceDeque.push_back(jacobstalNum);
+		jacobsthalSequenceDeque.push_back(jacobsthalNum);
+	}
+}
+
+void	PmergeMe::calculateJacobsthalList(int size)
+{
+	jacobsthalSequenceList.push_back(0);
+	jacobsthalSequenceList.push_back(1);
+
+	for (int i = 2; i < size + 2; ++i)
+	{
+//		int jacobsthalNum = jacobsthalSequenceList[i - 1] + 2 * jacobsthalSequenceList[i - 2];
+		int jacobsthalNum = *doAdvanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), i - 1) + 2 * *(doAdvanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), i - 2));
+		if (jacobsthalNum > size)
+		{
+			jacobsthalSequenceList.push_back(size);
+			break;
+		}
+		jacobsthalSequenceList.push_back(jacobsthalNum);
 	}
 }
 
@@ -284,6 +311,41 @@ void	PmergeMe::binarySearchDeque(int pendingChainElement)
 	mainChainDeque.insert(mainChainDeque.begin() + left, pendingChainElement);
 }
 
+void	PmergeMe::binarySearchList(int pendingChainElement)
+{
+	//*doAdvanceList()
+	int	left = 0;
+	int	right = 0;
+
+	for (std::list<std::pair<int,int> >::iterator it = pairList.begin(); it != pairList.end(); ++it)
+	{
+		if (it->second == pendingChainElement)
+		{
+			right = std::distance(mainChainList.begin(), std::find(mainChainList.begin(), mainChainList.end(), it->first));
+			break ;
+		}
+	}
+	while(left <= right)
+	{
+		int	mid = (left + right) / 2;
+//		if (mainChainList[mid] == pendingChainElement)
+		if (*doAdvanceList(mainChainList.begin(), mainChainList.end(), mid) == pendingChainElement)
+		{
+			mainChainList.insert(doAdvanceList(mainChainList.begin(), mainChainList.end(), mid), pendingChainElement);
+			return ;
+		}
+		else if (*doAdvanceList(mainChainList.begin(), mainChainList.end(), mid) < pendingChainElement)
+		{
+			left = mid + 1;
+		}
+		else
+		{
+			right = mid - 1;
+		}
+	}
+	mainChainList.insert(doAdvanceList(mainChainList.begin(), mainChainList.end(), left), pendingChainElement);
+}
+
 void	PmergeMe::binarySearchStragglerDeque()
 {
 	int	left = 0;
@@ -307,5 +369,30 @@ void	PmergeMe::binarySearchStragglerDeque()
 		}
 	}
 	mainChainDeque.insert(mainChainDeque.begin() + left, stragglerDeque);
+}
+
+void	PmergeMe::binarySearchStragglerList()
+{
+	int	left = 0;
+	int	right = mainChainList.size() - 1;
+
+	while(left <= right)
+	{
+		int	mid = (left + right) / 2;
+		if (*doAdvanceList(mainChainList.begin(), mainChainList.end(), mid) == stragglerList)
+		{
+			mainChainList.insert(doAdvanceList(mainChainList.begin(), mainChainList.end(), mid), stragglerList);
+			return ;
+		}
+		else if (*doAdvanceList(mainChainList.begin(), mainChainList.end(), mid) < stragglerList)
+		{
+			left = mid + 1;
+		}
+		else
+		{
+			right = mid - 1;
+		}
+	}
+	mainChainList.insert(doAdvanceList(mainChainList.begin(), mainChainList.end(), left), stragglerList);
 }
 
