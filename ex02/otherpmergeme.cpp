@@ -54,9 +54,9 @@ bool	PmergeMe::isValidSequence(std::string& sequence)
 			return false;
 		}
 		listSequence.push_back(static_cast<int>(num));
-        dequeSequence.push_back(static_cast<int>(num));
+		dequeSequence.push_back(static_cast<int>(num));
 	}
-    std::cout <<"Before: " << sequence << std::endl;
+	std::cout <<"Before: " << sequence << std::endl;
 	return true;
 }
 
@@ -89,13 +89,21 @@ void	PmergeMe::printList(const std::list<int> &list, const std::string &message)
 
 void	PmergeMe::printDeque(const std::deque<int> &deque, const std::string &message)
 {
-    std::cout << message;
-    for (std::deque<int>::const_iterator it = deque.begin(); it != deque.end(); it++)
-    {
-        std::cout << *it  << " ";
-    }
-    std::cout << std::endl;
+	std::cout << message;
+	for (std::deque<int>::const_iterator it = deque.begin(); it != deque.end(); it++)
+	{
+		std::cout << *it  << " ";
+	}
+	std::cout << std::endl;
 }
+
+/* 1. 두개 씩 묶는다. -> std::pair로 두 개씩 묶어서 새로운 각각의 컨테이너(덱, 리스트)에 넣는다.
+ * 2. 우리는 오름차순으로 정렬할 것이다. 따라서 pair의 first -> 큰 값 Second ->작은 값
+		first -> 메인체인 / second -> pending 체인
+ * 3. 메인체인 정렬
+ * 4. while을 돌며 야콥스탈수에 맞춰서 binary search 후 insert
+ * 5. 홀수일 경우 마지막 요소는 전체를 대상으로 binary search 후 삽입
+ * 6. clock_t : 클럭 틱 단위로 일반적으로는 초당 클럭 틱 수를 나타내며 CLOCKS_PER_SEC상수로 확인할 수 있다. */
 
 void	PmergeMe::printSortInfo()
 {
@@ -104,20 +112,24 @@ void	PmergeMe::printSortInfo()
 	clock_t endTimeDeque = clock();
 	double printTimeDeque = static_cast<double>(endTimeDeque - startTimeDeque) / CLOCKS_PER_SEC * 1000;
 
-	printDeque(mainChainDeque, "After : ");
+//	printDeque(mainChainDeque, "After : ");
 
 	clock_t startTimeList = clock();
 	mergeInsertSortList();
 	clock_t endTimeList = clock();
 	double printTimeList = static_cast<double>(endTimeList - startTimeList) / CLOCKS_PER_SEC * 1000;
-
-//	printList(mainChainList, "After : ");
+	printList(mainChainList, "After : ");
 
 	std::cout << "Time to process a rang of " << dequeSequence.size() \
 	<< " elements with [std::deque] " << printTimeDeque << " milliseconds" << std::endl;
 	std::cout << "Time to process a rang of " << listSequence.size() \
 	<< " elements with [std::list ] " << printTimeList << " milliseconds" << std::endl;
 }
+
+/* pending-chain 원소들을 하나씩 돌면서 main-chain에 삽입
+ * 이때 binary search하여 더 작은 원소 다음자리에 삽입
+ * 야콥스탈수열에 따른 순서대로 진행 1 -> 3 2 -> 5 4 -> 11 10 9 8 7 6 -> 21 20 ..
+ * 야콥스탈수와 현재 인덱스가 일치할때, 이 전 여콥스탈수보다 클때까지 하나씩 바이너리 서치 */
 
 void	PmergeMe::mergeInsertSortDeque(void)
 {
@@ -133,7 +145,7 @@ void	PmergeMe::mergeInsertSortDeque(void)
 	{
 		for (size_t i = jacobsthalSequenceDeque[jIdx] - 1; i >= jacobsthalSequenceDeque[jIdx - 1]; --i)
 		{
-			binarySearchDeque(i);
+			binarySearchDeque(pendingChainDeque[i]);
 		}
 	}
 	if (stragglerDeque > 0)
@@ -166,9 +178,11 @@ void	PmergeMe::mergeInsertSortList(void)
 	mainChainList.push_front(*pendingChainList.begin());
 	for (size_t jIdx = 3; jIdx < jacobsthalSequenceList.size(); ++jIdx)
 	{
+//		for (size_t i = jacobsthalSequenceList[jIdx] - 1; i >= jacobsthalSequenceList[jIdx - 1]; --i)
 		for (int i = *advanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), jIdx) - 1; i >= *advanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), jIdx - 1); --i)
 		{
-			binarySearchList(advanceList(pendingChainList.begin(), pendingChainList.end(), i));
+			binarySearchList(*advanceList(pendingChainList.begin(), pendingChainList.end(), i));
+//			binarySearchList(pendingChainList[i]);
 		}
 	}
 	if (stragglerDeque > 0)
@@ -179,52 +193,27 @@ void	PmergeMe::mergeInsertSortList(void)
 
 void PmergeMe::initChainDeque()
 {
-    if (dequeSequence.size() % 2)
-    {
-        stragglerDeque = *dequeSequence.rbegin();
-    }
-    for(size_t i = 1; i < dequeSequence.size(); i += 2)
-    {
-        if (dequeSequence[i - 1] > dequeSequence[i])
-        {
-			binaryInsertionDeque(std::make_pair(dequeSequence[i - 1],dequeSequence[i]));
-        }
-        else
-        {
-			binaryInsertionDeque(std::make_pair(dequeSequence[i], dequeSequence[i - 1]));
-        }
-    }
-    for(std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
-    {
-        mainChainDeque.push_back(it->first);
-        pendingChainDeque.push_back(it->second);
-    }
-//	printDeque(mainChainDeque, "mainchain    : ");
-//	printDeque(pendingChainDeque, "pendingchain : ");
-}
-
-void	PmergeMe::binaryInsertionDeque(std::pair<int,int> newPair)
-{
-	int left = 0;
-	int right = pairDeque.size() - 1;
-	while (left <= right)
+	if (dequeSequence.size() % 2)
 	{
-		int mid = (left + right) / 2;
-		if (pairDeque[mid].first == newPair.first)
+		stragglerDeque = *dequeSequence.rbegin();
+	}
+	for(size_t i = 1; i < dequeSequence.size(); i += 2)
+	{
+		if (dequeSequence[i - 1] > dequeSequence[i])
 		{
-			pairDeque.insert(pairDeque.begin() + mid, newPair);
-			return ;
-		}
-		else if (pairDeque[mid].first < newPair.first)
-		{
-			left = mid + 1;
+			pairDeque.push_back(std::make_pair(dequeSequence[i - 1],dequeSequence[i]));
 		}
 		else
 		{
-			right = mid - 1;
+			pairDeque.push_back(std::make_pair(dequeSequence[i], dequeSequence[i - 1]));
 		}
 	}
-	pairDeque.insert(pairDeque.begin() + left, newPair);
+	std::sort(pairDeque.begin(), pairDeque.end());
+	for(std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
+	{
+		mainChainDeque.push_back(it->first);
+		pendingChainDeque.push_back(it->second);
+	}
 }
 
 void PmergeMe::initChainList()
@@ -237,52 +226,21 @@ void PmergeMe::initChainList()
 	{
 		if (*advanceList(listSequence.begin(), listSequence.end(), i - 1) > *advanceList(listSequence.begin(), listSequence.end(), i))
 		{
-			binaryInsertionList(std::make_pair(*advanceList(listSequence.begin(), listSequence.end(), i - 1), *advanceList(listSequence.begin(), listSequence.end(), i)));
+			pairList.push_back(std::make_pair(*advanceList(listSequence.begin(), listSequence.end(), i - 1), *advanceList(listSequence.begin(), listSequence.end(), i)));
 		}
 		else
 		{
-			binaryInsertionList(std::make_pair(*advanceList(listSequence.begin(), listSequence.end(), i), *advanceList(listSequence.begin(), listSequence.end(), i - 1)));
+			pairList.push_back(std::make_pair(*advanceList(listSequence.begin(), listSequence.end(), i), *advanceList(listSequence.begin(), listSequence.end(),i - 1)));
 		}
 	}
+	pairList.sort();
 	for(std::list<std::pair<int,int> >::iterator it = pairList.begin(); it != pairList.end(); ++it)
 	{
 		mainChainList.push_back(it->first);
 		pendingChainList.push_back(it->second);
 	}
-//	printList(mainChainList, "list mainchain   : ");
+//	printList(mainChainList, "list mainchain: ");
 //	printList(pendingChainList, "list pendingchain: ");
-}
-
-static std::list<std::pair<int, int> >::iterator advancePairList(std::list<std::pair<int, int> >& pairList, int idx)
-{
-	std::list<std::pair<int, int> >::iterator it = pairList.begin();
-	for (int i = 0; i < idx && it != pairList.end(); ++i, ++it);
-	return it;
-}
-
-void	PmergeMe::binaryInsertionList(std::pair<int,int> newPair)
-{
-	int left = 0;
-	int right = pairList.size() - 1;
-
-	while (left <= right)
-	{
-		int mid = (left + right) / 2;
-		if (advancePairList(pairList, mid)->first == newPair.first)
-		{
-			pairList.insert(advancePairList(pairList, mid), newPair);
-			return ;
-		}
-		else if (advancePairList(pairList, mid)->first < newPair.first)
-		{
-			left = mid + 1;
-		}
-		else
-		{
-			right = mid - 1;
-		}
-	}
-	pairList.insert(advancePairList(pairList, left), newPair);
 }
 
 void	PmergeMe::calculateJacobsthalDeque(unsigned int size)
@@ -309,6 +267,7 @@ void	PmergeMe::calculateJacobsthalList(int size)
 
 	for (int i = 2; i < size + 2; ++i)
 	{
+//		int jacobsthalNum = jacobsthalSequenceList[i - 1] + 2 * jacobsthalSequenceList[i - 2];
 		int jacobsthalNum = *advanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), i - 1) + 2 * *(advanceList(jacobsthalSequenceList.begin(), jacobsthalSequenceList.end(), i - 2));
 		if (jacobsthalNum > size)
 		{
@@ -319,29 +278,28 @@ void	PmergeMe::calculateJacobsthalList(int size)
 	}
 }
 
-void	PmergeMe::binarySearchDeque(int pendingChainIdx)
+void	PmergeMe::binarySearchDeque(int pendingChainElement)
 {
 	int	left = 0;
-	int	right = static_cast<int>(mainChainDeque.size() - pendingChainDeque.size());
+	int	right = 0;
 
-	std::deque<std::pair<int, int> >::iterator  it = pairDeque.begin();
-	for (; pendingChainIdx > 0; --pendingChainIdx)
+	for (std::deque<std::pair<int,int> >::iterator it = pairDeque.begin(); it != pairDeque.end(); ++it)
 	{
-		if (it != pairDeque.end())
+		if (it->second == pendingChainElement)
 		{
-			it++;
-			right++;
+			right = std::distance(mainChainDeque.begin(), std::find(mainChainDeque.begin(), mainChainDeque.end(), it->first));
+			break ;
 		}
 	}
 	while(left <= right)
 	{
 		int	mid = (left + right) / 2;
-		if (mainChainDeque[mid] == (it->second))
+		if (mainChainDeque[mid] == pendingChainElement)
 		{
-			mainChainDeque.insert(mainChainDeque.begin() + mid, (it->second));
+			mainChainDeque.insert(mainChainDeque.begin() + mid, pendingChainElement);
 			return ;
 		}
-		else if (mainChainDeque[mid] < (it->second))
+		else if (mainChainDeque[mid] < pendingChainElement)
 		{
 			left = mid + 1;
 		}
@@ -350,24 +308,33 @@ void	PmergeMe::binarySearchDeque(int pendingChainIdx)
 			right = mid - 1;
 		}
 	}
-	mainChainDeque.insert(mainChainDeque.begin() + left, (it->second));
+	mainChainDeque.insert(mainChainDeque.begin() + left, pendingChainElement);
 }
 
-void	PmergeMe::binarySearchList(std::list<int>::iterator listIt)
+void	PmergeMe::binarySearchList(int pendingChainElement)
 {
+	//*advanceList()
 	int	left = 0;
-	int	right = static_cast<int>(mainChainList.size() - pendingChainList.size());
+	int	right = 0;
 
-	right += std::distance(pendingChainList.begin(), listIt);
+	for (std::list<std::pair<int,int> >::iterator it = pairList.begin(); it != pairList.end(); ++it)
+	{
+		if (it->second == pendingChainElement)
+		{
+			right = std::distance(mainChainList.begin(), std::find(mainChainList.begin(), mainChainList.end(), it->first));
+			break ;
+		}
+	}
 	while(left <= right)
 	{
 		int	mid = (left + right) / 2;
-		if (*advanceList(mainChainList.begin(), mainChainList.end(), mid) == *listIt)
+//		if (mainChainList[mid] == pendingChainElement)
+		if (*advanceList(mainChainList.begin(), mainChainList.end(), mid) == pendingChainElement)
 		{
-			mainChainList.insert(advanceList(mainChainList.begin(), mainChainList.end(), mid), *listIt);
+			mainChainList.insert(advanceList(mainChainList.begin(), mainChainList.end(), mid), pendingChainElement);
 			return ;
 		}
-		else if (*advanceList(mainChainList.begin(), mainChainList.end(), mid) < *listIt)
+		else if (*advanceList(mainChainList.begin(), mainChainList.end(), mid) < pendingChainElement)
 		{
 			left = mid + 1;
 		}
@@ -376,7 +343,7 @@ void	PmergeMe::binarySearchList(std::list<int>::iterator listIt)
 			right = mid - 1;
 		}
 	}
-	mainChainList.insert(advanceList(mainChainList.begin(), mainChainList.end(), left), *listIt);
+	mainChainList.insert(advanceList(mainChainList.begin(), mainChainList.end(), left), pendingChainElement);
 }
 
 void	PmergeMe::binarySearchStragglerDeque()

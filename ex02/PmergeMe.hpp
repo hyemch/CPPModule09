@@ -25,15 +25,17 @@ public:
 	void    printDeque(const std::deque<int>& deque, const std::string& message);
 	void	mergeInsertSortDeque(void);
     void    initChainDeque();
+	void	binaryInsertionDeque(std::pair<int, int> newPair);
 	void	calculateJacobsthalDeque(unsigned int size);
-	void	binarySearchDeque(int pendingChainElement);
+	void	binarySearchDeque(int pendingChainIdx);
 	void	binarySearchStragglerDeque();
 
 	void	printList(const std::list<int>& list, const std::string& message);
 	void	mergeInsertSortList(void);
 	void    initChainList();
+	void	binaryInsertionList(std::pair<int,int> newPair);
 	void	calculateJacobsthalList(int size);
-	void	binarySearchList(int pendingChainElement);
+	void	binarySearchList(std::list<int>::iterator listIt);
 	void	binarySearchStragglerList();
 
 private:
