@@ -27,7 +27,7 @@ void	RPN::calculateRPN(const char *argv)
 {
 	if (!isValidExpression(argv))
 	{
-		std::cerr << "Error: RPN example: \"[a positive integer1] [a positive integer2] [operator] ...\"" << std::endl;
+		std::cerr << "Error: RPN is invalid." << std::endl;
 		return ;
 	}
 	std::istringstream iss(argv);
@@ -75,7 +75,7 @@ void	RPN::calculateRPN(const char *argv)
 	}
 }
 
-bool	RPN::isValidExpression(const std::string&equence)
+bool	RPN::isValidExpression(const char* argv)
 {
 	std::string expression = argv;
 	for (size_t i = 0; i < expression.size(); i++)

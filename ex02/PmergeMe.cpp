@@ -104,14 +104,14 @@ void	PmergeMe::printSortInfo()
 	clock_t endTimeDeque = clock();
 	double printTimeDeque = static_cast<double>(endTimeDeque - startTimeDeque) / CLOCKS_PER_SEC * 1000;
 
-	printDeque(mainChainDeque, "After : ");
+//	printDeque(mainChainDeque, "After : ");
 
 	clock_t startTimeList = clock();
 	mergeInsertSortList();
 	clock_t endTimeList = clock();
 	double printTimeList = static_cast<double>(endTimeList - startTimeList) / CLOCKS_PER_SEC * 1000;
 
-//	printList(mainChainList, "After : ");
+	printList(mainChainList, "After : ");
 
 	std::cout << "Time to process a rang of " << dequeSequence.size() \
 	<< " elements with [std::deque] " << printTimeDeque << " milliseconds" << std::endl;
@@ -199,8 +199,6 @@ void PmergeMe::initChainDeque()
         mainChainDeque.push_back(it->first);
         pendingChainDeque.push_back(it->second);
     }
-//	printDeque(mainChainDeque, "mainchain    : ");
-//	printDeque(pendingChainDeque, "pendingchain : ");
 }
 
 void	PmergeMe::binaryInsertionDeque(std::pair<int,int> newPair)
@@ -249,8 +247,6 @@ void PmergeMe::initChainList()
 		mainChainList.push_back(it->first);
 		pendingChainList.push_back(it->second);
 	}
-//	printList(mainChainList, "list mainchain   : ");
-//	printList(pendingChainList, "list pendingchain: ");
 }
 
 static std::list<std::pair<int, int> >::iterator advancePairList(std::list<std::pair<int, int> >& pairList, int idx)
