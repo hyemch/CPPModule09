@@ -9,8 +9,10 @@ int main(int argc, char* argv[])
 	}
 
 	BitcoinExchange* btcExchange = BitcoinExchange::getInstance();
-	btcExchange->setBitcoinData();
-	btcExchange->setInputFile(argv[1]);
+	if (btcExchange->setBitcoinData())
+	{
+		btcExchange->setInputFile(argv[1]);
+	}
 	BitcoinExchange::releaseInstance();
 
 	return 0;

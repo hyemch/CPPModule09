@@ -51,7 +51,10 @@ void	RPN::calculateRPN(const char *argv)
 				std::cerr << "Error: Not enough operands." << std::endl;
 				return ;
 			}
-			executeOperator(token);
+			if (!executeOperator(token))
+			{
+				return ;
+			}
 		}
 	}
 	if (operandStack.size() == 1)
@@ -106,7 +109,7 @@ bool	RPN::isOperator(const std::string &token)
 	}
 }
 
-void	RPN::executeOperator(const std::string &token)
+bool	RPN::executeOperator(const std::string &token)
 {
 	long operand1 = operandStack.top();
 	operandStack.pop();
@@ -123,10 +126,16 @@ void	RPN::executeOperator(const std::string &token)
 	}
 	else if (token == "/")
 	{
+		if (operand1 == 0)
+		{
+			std::cerr << "Error : Division by zero is undefined." << std::endl;
+			return false;
+		}
 		operandStack.push(operand2 / operand1);
 	}
 	else if (token == "*")
 	{
 		operandStack.push(operand2 * operand1);
 	}
+	return true;
 }

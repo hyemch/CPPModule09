@@ -40,6 +40,29 @@ bool	BitcoinExchange::isValidField(const std::string &firstLine, const char sep,
 	return true;
 }
 
+static bool monthOfDate(int &year,int &month,int &day)
+{
+	if (month == 2)
+	{
+		if((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
+		{
+			return day <= 29;
+		}
+		else
+		{
+			return day <= 28;
+		}
+	}
+	else if (month == 4 || month == 6 || month == 9 || month == 11)
+	{ // 4, 6, 9, 11월
+		return day <= 30;
+	}
+	else
+	{ // 나머지 달 (1, 3, 5, 7, 8, 10, 12월)
+		return day <= 31;
+	}
+}
+
 bool	BitcoinExchange::isValidDate(const std::string &date)
 {
 	if (date.length() != 10)
@@ -70,25 +93,35 @@ bool	BitcoinExchange::isValidDate(const std::string &date)
 	dateStream >> year >> dash1 >> month >> dash2 >> day;
 
 	// stringstream이 제대로 파싱했는지와 각 부분이 유효한 값인지 확인
-	return dateStream.eof() && year >= 0 && month >= 1 && month <= 12 \
-	&& day >= 1 && day <= 31;
+	if (dateStream.eof() && year >= 0 && month >= 1 && month <= 12 \
+	&& day >= 1 && day <= 31 && monthOfDate(year, month, day))
+	{
+		return true;
+	}
+	else
+		return false;
+//	if (!monthOfDate(year, month, day))
+//	{
+//		return false;
+//	}
+//	return true;
 }
 
-void	BitcoinExchange::setBitcoinData()
+bool	BitcoinExchange::setBitcoinData()
 {
 	std::ifstream dataFile("data.csv");
 
 	if (!dataFile.is_open())
 	{
 		std::cerr << "Error: could not find datafile." << std::endl;
-		return ;
+		return false;
 	}
 	std::string line;
 	std::getline(dataFile, line);
 	if (!isValidField(line, ',', "date", "exchange_rate"))
 	{
 		std::cerr << "Error: could not find data field: " << line << std::endl;
-		return ;
+		return false;
 	}
 	while (std::getline(dataFile, line))
 	{
@@ -98,17 +131,17 @@ void	BitcoinExchange::setBitcoinData()
 		if(!std::getline(iss, date, ','))
 		{
 			std::cerr << "Error: database date error." << std::endl;
-			return ;
+			return false;
 		}
 		if (!isValidDate(date))
 		{
-			std::cerr << "Error: date form [0000-00-00] : " << date << std::endl;
-			return ;
+			std::cerr << "Error: Invalid date form : " << date << std::endl;
+			return false;
 		}
 		if (!(iss >> exchangeRate) || !iss.eof())
 		{
 			std::cerr << "Error: database exchange rate error." << std::endl;
-			return ;
+			return false;
 		}
 //		if (!iss.eof())
 //		{
@@ -117,6 +150,7 @@ void	BitcoinExchange::setBitcoinData()
 //		}
 		bitcoinData[date] = exchangeRate;
 	}
+	return true;
 }
 
 void	BitcoinExchange::setInputFile(const char* argv)
@@ -153,7 +187,7 @@ void	BitcoinExchange::setInputFile(const char* argv)
 		removeWhitespace(date);
 		if (!isValidDate(date))
 		{
-			std::cerr << "Error: date form [0000-00-00] : " << date << std::endl;
+			std::cerr << "Error: date form [0000-00-00] and valid date : " << date << std::endl;
 			continue;
 		}
 		if (value <= 0 || value >= 1000)
@@ -162,12 +196,12 @@ void	BitcoinExchange::setInputFile(const char* argv)
 			continue;
 		}
 		std::map<std::string, double>::iterator findData = bitcoinData.lower_bound(date);
-		if (findData == bitcoinData.begin())
+		if (findData->first != date && findData == bitcoinData.begin())
 		{
 			std::cerr << "Error: no valid date found." << std::endl;
-			return ;
+			continue;
 		}
-		if (findData->first != date)
+		else if (findData->first != date)
 		{
 			--findData;
 		}

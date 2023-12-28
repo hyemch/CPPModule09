@@ -16,7 +16,7 @@ public:
 	void	calculateRPN(const char* argv);
 	bool	isValidExpression(const char* argv);
 	bool	isOperator(const std::string& token);
-	void	executeOperator(const std::string& token);
+	bool	executeOperator(const std::string& token);
 
 private:
 	static RPN* instance;

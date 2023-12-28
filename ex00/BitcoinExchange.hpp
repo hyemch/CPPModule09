@@ -14,7 +14,7 @@ public:
 	static void	releaseInstance();
 
 	// 필요한 멤버 함수 만들기
-	void	setBitcoinData();
+	bool	setBitcoinData();
 	bool	isValidField(const std::string& firstLine, const char sep, std::string str1, std::string str2);
 	bool	isValidDate(const std::string& data);
 
